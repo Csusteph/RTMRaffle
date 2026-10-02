@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RTW Raffle Command Center · ADMIN</title>
+<meta name="robots" content="noindex,nofollow" />
+<meta name="color-scheme" content="dark" />
+<style>
+/* ═══ Ready to Win design system ═══ */
+:root{
+  --bg:#141414; --panel:#1D1D1B; --line:rgba(255,255,255,.12);
+  --ink:#FFFFFF; --ink2:#B8B3AE; --ink3:#7d7873;
+  --red:#E4051F; --gold:#C9A24B; --green:#3DAE5A; --blue:#7FCFE0;
+  --gold-award:#FFD700;
+  --display:'Archivo','Helvetica Neue',Arial,sans-serif;
+  --heavy:'Archivo Black','Archivo',sans-serif;
+  --mono:'JetBrains Mono',Consolas,monospace;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Black&family=JetBrains+Mono:wght@400;600&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--display);font-size:15px;line-height:1.5;min-height:100vh}
+.num{font-family:var(--mono)}
+
+/* top bar */
+.topnav{background:#fff;border-bottom:1px solid #e5e2de;position:sticky;top:0;z-index:100}
+.topnav-in{max-width:1180px;margin:0 auto;padding:0 1.4rem;height:58px;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.wm{font-family:var(--heavy);font-size:14px;letter-spacing:.06em;color:#111}
+.wm b{color:var(--red)}
+.admin-pill{background:var(--red);color:#fff;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.18em;padding:6px 14px;border-radius:999px}
+
+.page{max-width:1180px;margin:0 auto;padding:2.2rem 1.4rem 5rem}
+
+/* two-tone heading */
+.tt{margin-bottom:1.2rem}
+.tt .l1{display:block;font-family:var(--display);font-weight:400;font-size:clamp(24px,3.2vw,34px);color:var(--ink);line-height:1.05}
+.tt .l2{display:block;font-family:var(--heavy);font-weight:900;font-size:clamp(28px,3.8vw,40px);text-transform:uppercase;letter-spacing:-.02em;line-height:1.05;color:var(--red)}
+.tt::after{content:'';display:block;height:1px;background:var(--line);margin-top:14px}
+.tt-sub{font-size:14px;color:var(--ink2);margin:-4px 0 1.6rem;max-width:70ch}
+
+.grid{display:grid;grid-template-columns:380px 1fr;gap:16px;align-items:start}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.card{border:1px solid var(--line);border-radius:4px;background:var(--panel)}
+.card-h{padding:1rem 1.3rem;border-bottom:1px solid var(--line);font-weight:700;font-size:15px;display:flex;justify-content:space-between;align-items:center}
+.card-tag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
+.card-b{padding:1.1rem 1.3rem}
+
+/* pool table */
+.pool-scroll{max-height:480px;overflow-y:auto;padding:.6rem .9rem 1rem}
+.pool-row{display:flex;align-items:center;gap:10px;padding:7px 6px;border-radius:3px;font-size:13px}
+.pool-row.won{opacity:.38;text-decoration:line-through}
+.pool-name{flex:1;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pool-pts{font-family:var(--mono);font-size:11.5px;color:var(--ink3);white-space:nowrap}
+.pool-tix{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--gold);white-space:nowrap;min-width:64px;text-align:right}
+.pool-bonus{font-size:10px;color:var(--gold-award)}
+
+/* prize selector */
+.prizes{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:1.4rem}
+@media(max-width:1100px){.prizes{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:640px){.prizes{grid-template-columns:repeat(2,1fr)}}
+.prize-btn{border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--ink);padding:12px 10px 13px;cursor:pointer;text-align:center;transition:border-color .15s,transform .15s;font-family:var(--display)}
+.prize-btn:hover{transform:translateY(-2px)}
+.prize-btn.on{border-color:var(--red);box-shadow:0 0 0 1px var(--red)}
+.prize-btn .pimg{height:86px;width:100%;object-fit:contain;display:block;filter:drop-shadow(0 6px 12px rgba(0,0,0,.4))}
+.prize-btn .pn{font-size:12px;font-weight:700;margin-top:8px;line-height:1.25}
+.prize-btn .pq{font-family:var(--mono);font-size:10.5px;color:var(--gold);margin-top:3px}
+.prize-btn .pq.out{color:var(--ink3)}
+
+/* the stage */
+.stage{border:1px solid var(--line);border-radius:4px;background:var(--panel);text-align:center;padding:2.6rem 1.5rem;position:relative;overflow:hidden}
+.stage-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink3)}
+.stage-name{font-family:var(--heavy);font-weight:900;font-size:clamp(30px,5vw,54px);line-height:1.1;min-height:1.2em;margin:.6rem 0 .3rem;letter-spacing:-.02em}
+.stage-name.shuffling{color:var(--ink2)}
+.stage-name.winner{color:var(--gold-award);animation:winner-pop .6s var(--ease)}
+@keyframes winner-pop{0%{transform:scale(.7)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+.stage-sub{font-size:13.5px;color:var(--ink2);min-height:1.4em}
+.stage-prize-img{height:120px;width:auto;max-width:80%;object-fit:contain;margin:1rem auto 0;display:none;filter:drop-shadow(0 10px 22px rgba(0,0,0,.5));animation:winner-pop .6s var(--ease)}
+.stage-prize-img.on{display:block}
+.draw-btn{margin-top:1.6rem;background:var(--red);color:#fff;border:none;border-radius:999px;padding:15px 42px;font-family:var(--heavy);font-size:16px;letter-spacing:.02em;cursor:pointer;transition:background .15s,transform .15s}
+.draw-btn:hover:not(:disabled){background:#c70419;transform:scale(1.04)}
+.draw-btn:disabled{opacity:.4;cursor:not-allowed}
+.undo-btn{margin-top:.8rem;margin-left:10px;background:none;border:1px solid var(--line);color:var(--ink2);border-radius:999px;padding:9px 18px;font-size:12px;cursor:pointer;font-family:var(--display)}
+.undo-btn:hover{border-color:var(--ink2);color:var(--ink)}
+
+/* winners */
+.win-row{display:flex;align-items:center;gap:12px;padding:9px 4px;border-bottom:1px solid var(--line);font-size:13.5px}
+.win-row:last-child{border-bottom:none}
+.win-ic{font-size:19px;width:28px;text-align:center}
+.win-name{flex:1;font-weight:700}
+.win-prize{font-family:var(--mono);font-size:11px;color:var(--gold)}
+.empty{padding:1rem;font-size:12.5px;color:var(--ink3);text-align:center}
+
+/* confetti */
+.confetti{position:fixed;top:-14px;z-index:9999;pointer-events:none;animation:cfall linear forwards}
+@keyframes cfall{to{transform:translateY(105vh) rotate(720deg);opacity:.9}}
+
+.toolbar{display:flex;gap:10px;align-items:center;margin-bottom:1.2rem;flex-wrap:wrap}
+.tool-btn{background:none;border:1px solid var(--line);border-radius:999px;color:var(--ink2);padding:8px 16px;font-size:12.5px;cursor:pointer;font-family:var(--display)}
+.tool-btn:hover{border-color:var(--ink2);color:var(--ink)}
+.status{font-family:var(--mono);font-size:11px;color:var(--ink3)}
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <div class="topnav-in">
+    <div class="wm">READY TO <b>WIN</b> 2027 · RAFFLE COMMAND CENTER</div>
+    <span class="admin-pill">ADMIN ONLY</span>
+  </div>
+</header>
+
+<main class="page">
+  <h1 class="tt"><span class="l1">Live prize</span><span class="l2">Drawing</span></h1>
+  <p class="tt-sub">Pulls live points from the RTW Points list. Tickets = 1 per 100 points (max 10), +1 bonus for completing all challenges. Each draw picks one weighted random ticket — more tickets, better odds. Winners are removed from later draws.</p>
+
+  <div class="toolbar">
+    <button class="tool-btn" onclick="loadPool()">↻ Refresh pool from SharePoint</button>
+    <button class="tool-btn" onclick="resetAll()">Reset all winners</button>
+    <span class="status" id="status">Loading…</span>
+  </div>
+
+  <!-- prize selector -->
+  <div class="prizes" id="prizes"><!-- js --></div>
+
+  <div class="grid">
+    <!-- ticket pool -->
+    <div class="card">
+      <div class="card-h">🎟️ Ticket pool <span class="card-tag" id="pool-tag">—</span></div>
+      <div class="pool-scroll" id="pool"><p class="empty">Loading sellers…</p></div>
+    </div>
+
+    <div>
+      <!-- draw stage -->
+      <div class="stage">
+        <div class="stage-label" id="stage-label">Select a prize, then draw</div>
+        <div class="stage-name" id="stage-name">— — —</div>
+        <div class="stage-sub" id="stage-sub">&nbsp;</div>
+        <img class="stage-prize-img" id="stage-img" src="" alt="" />
+        <br><button class="draw-btn" id="draw-btn" onclick="draw()" disabled>DRAW A TICKET</button>
+        <button class="undo-btn" onclick="undoLast()">undo last draw</button>
+      </div>
+
+      <!-- winners -->
+      <div class="card" style="margin-top:16px">
+        <div class="card-h">🏆 Winners <span class="card-tag" id="win-tag">0 of 30</span></div>
+        <div class="card-b" id="winners"><p class="empty">No winners yet — the drawing hasn't started.</p></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+'use strict';
+// ═══ CONFIG — same flow as the main page ═══
+const FLOW_URL = 'https://a477fe69c32a4af79331a1752086c6.34.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/29/workflows/f7ffe73d8b7646beaae732fc93dfc89e/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=n9CBA8MRYL_y6TlNTpJxUkfnCyxZ451EPOaYqFoX3SY';
+const EVENT_KEY = 'rtw2027';
+const TOTAL_CHALLENGES = 13;      // completing all = +1 bonus ticket
+const MAX_TICKETS = 10;           // before bonus
+
+const PRIZES = [
+  { id:'ps5',     name:'PlayStation 5',           img:'images/playstation.png', icon:'🎮', qty:4 },
+  { id:'bike',    name:'smartwater Mountain Bike',img:'images/bike.png',        icon:'🚵', qty:5 },
+  { id:'tundra',  name:'Yeti Tundra 45 Cooler',   img:'images/yetitundra.png',  icon:'⛺', qty:5 },
+  { id:'grill',   name:'18" Kettle Grill',        img:'images/grill.png',       icon:'🔥', qty:5 },
+  { id:'yetiice', name:'Yeti Ice Bucket',         img:'images/yetiice.png',     icon:'🧊', qty:6 },
+  { id:'backpack',name:'OGIO Backpack',           img:'images/backpack.png',    icon:'🎒', qty:5 },
+];
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+let pool=[];            // [{name, pts, tickets, bonus}]
+let winners=[];         // [{name, prizeId}] persisted
+let currentPrize=null;
+let drawing=false;
+
+// ═══ persistence (survives refresh mid-event) ═══
+function saveState(){localStorage.setItem('rtw-raffle-winners',JSON.stringify(winners))}
+function loadState(){try{winners=JSON.parse(localStorage.getItem('rtw-raffle-winners'))||[]}catch{winners=[]}}
+
+// ═══ load ticket pool from the flow ═══
+async function callFlow(action,extra={}){
+  const res=await fetch(FLOW_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action,eventKey:EVENT_KEY,...extra})});
+  if(!res.ok)throw new Error('HTTP '+res.status);
+  return res.json();
+}
+
+async function loadPool(){
+  $('status').textContent='Loading…';
+  try{
+    const {value}=await callFlow('getLeaderboard');
+    const people={};   // name → {pts, count}
+    (value||[]).forEach(r=>{
+      const name=(r.UserName||r.Title||'').trim(); if(!name)return;
+      const p=people[name]||(people[name]={pts:0,count:0});
+      p.pts+=Number(r.XPValue)||0;
+      p.count+=1;
+    });
+    pool=Object.entries(people).map(([name,p])=>{
+      const bonus=p.count>=TOTAL_CHALLENGES;
+      const tickets=Math.min(Math.floor(p.pts/100),MAX_TICKETS)+(bonus?1:0);
+      return {name,pts:p.pts,tickets,bonus};
+    }).filter(p=>p.tickets>0)
+      .sort((a,b)=>b.tickets-a.tickets||b.pts-a.pts);
+    $('status').textContent='Pool loaded '+new Date().toLocaleTimeString();
+    renderAll();
+  }catch(e){
+    $('status').textContent='Load failed: '+e.message;
+    $('pool').innerHTML='<p class="empty">Could not reach the flow — check FLOW_URL / internet.</p>';
+  }
+}
+
+// ═══ weighted draw with crypto randomness ═══
+function eligible(){
+  const wonNames=new Set(winners.map(w=>w.name.toLowerCase()));
+  return pool.filter(p=>!wonNames.has(p.name.toLowerCase()));
+}
+function pickWeighted(cands){
+  const total=cands.reduce((s,p)=>s+p.tickets,0);
+  const buf=new Uint32Array(1); crypto.getRandomValues(buf);
+  let ticket=buf[0]%total;
+  for(const p of cands){ if(ticket<p.tickets)return p; ticket-=p.tickets; }
+  return cands[cands.length-1];
+}
+
+async function draw(){
+  if(drawing||!currentPrize)return;
+  const prize=PRIZES.find(p=>p.id===currentPrize);
+  const left=prize.qty-winners.filter(w=>w.prizeId===prize.id).length;
+  if(left<=0)return;
+  const cands=eligible();
+  if(!cands.length){$('stage-sub').textContent='No eligible sellers left in the pool!';return}
+
+  drawing=true; $('draw-btn').disabled=true;
+  const nameEl=$('stage-name'), subEl=$('stage-sub');
+  nameEl.classList.remove('winner'); nameEl.classList.add('shuffling');
+  $('stage-img').classList.remove('on');
+  $('stage-label').textContent='Drawing for '+prize.name+'…';
+
+  const winner=pickWeighted(cands);
+
+  // slot-machine shuffle that decelerates, then lands on the winner
+  let delay=55;
+  while(delay<560){
+    nameEl.textContent=cands[Math.floor(Math.random()*cands.length)].name;
+    await new Promise(r=>setTimeout(r,delay));
+    delay*=1.18;
+  }
+  nameEl.textContent=winner.name;
+  nameEl.classList.remove('shuffling'); nameEl.classList.add('winner');
+  subEl.innerHTML='wins a <b>'+prize.icon+' '+esc(prize.name)+'</b> with '+winner.tickets+' tickets in the pool!';
+  const si=$('stage-img'); si.src=prize.img; si.alt=prize.name; si.classList.add('on');
+  $('stage-label').textContent='🎉 WINNER 🎉';
+  confetti(180);
+
+  winners.push({name:winner.name,prizeId:prize.id});
+  saveState(); renderAll();
+  drawing=false;
+}
+
+function undoLast(){
+  if(drawing||!winners.length)return;
+  const w=winners.pop(); saveState(); renderAll();
+  $('stage-label').textContent='Draw undone';
+  $('stage-name').textContent='— — —';
+  $('stage-name').classList.remove('winner');
+  $('stage-img').classList.remove('on');
+  $('stage-sub').textContent=w.name+' returned to the pool.';
+}
+function resetAll(){
+  if(!confirm('Clear ALL winners and start the drawing over?'))return;
+  winners=[]; saveState(); renderAll();
+  $('stage-label').textContent='Select a prize, then draw';
+  $('stage-name').textContent='— — —'; $('stage-name').classList.remove('winner');
+  $('stage-img').classList.remove('on');
+  $('stage-sub').innerHTML='&nbsp;';
+}
+
+// ═══ render ═══
+function renderAll(){
+  // prizes
+  $('prizes').innerHTML=PRIZES.map(p=>{
+    const won=winners.filter(w=>w.prizeId===p.id).length;
+    const left=p.qty-won;
+    return `<button class="prize-btn ${currentPrize===p.id?'on':''}" onclick="selectPrize('${p.id}')">
+      <img class="pimg" src="${p.img}" alt="${esc(p.name)}" loading="lazy" /><span class="pn">${esc(p.name)}</span>
+      <span class="pq ${left<=0?'out':''}">${left<=0?'ALL AWARDED':left+' of '+p.qty+' left'}</span></button>`;
+  }).join('');
+  // pool
+  const wonNames=new Set(winners.map(w=>w.name.toLowerCase()));
+  const totalTix=eligible().reduce((s,p)=>s+p.tickets,0);
+  $('pool-tag').textContent=eligible().length+' sellers · '+totalTix+' tickets';
+  $('pool').innerHTML=pool.length?pool.map(p=>`
+    <div class="pool-row ${wonNames.has(p.name.toLowerCase())?'won':''}">
+      <div class="pool-name">${esc(p.name)}</div>
+      <div class="pool-pts num">${p.pts.toLocaleString()} pts</div>
+      <div class="pool-tix">${p.tickets} 🎟️${p.bonus?'<span class="pool-bonus"> +B</span>':''}</div>
+    </div>`).join(''):'<p class="empty">Nobody has tickets yet.</p>';
+  // winners
+  const total=PRIZES.reduce((s,p)=>s+p.qty,0);
+  $('win-tag').textContent=winners.length+' of '+total;
+  $('winners').innerHTML=winners.length?winners.map((w,i)=>{
+    const p=PRIZES.find(x=>x.id===w.prizeId);
+    return `<div class="win-row"><span class="win-ic">${p.icon}</span>
+      <span class="win-name">${esc(w.name)}</span><span class="win-prize">${esc(p.name)}</span></div>`;
+  }).join(''):'<p class="empty">No winners yet — the drawing hasn\'t started.</p>';
+  // draw button state
+  const prize=PRIZES.find(p=>p.id===currentPrize);
+  const canDraw=prize&&(prize.qty-winners.filter(w=>w.prizeId===prize.id).length)>0&&eligible().length>0;
+  $('draw-btn').disabled=!canDraw||drawing;
+}
+
+function selectPrize(id){
+  currentPrize=id; renderAll();
+  const p=PRIZES.find(x=>x.id===id);
+  $('stage-label').textContent='Drawing for '+p.name;
+}
+
+// ═══ confetti ═══
+function confetti(n){
+  const colors=['#E4051F','#FFD700','#C9A24B','#FF5A5F','#F5E7A0','#FFFFFF'];
+  for(let i=0;i<n;i++){
+    const c=document.createElement('div'); c.className='confetti';
+    const s=6+Math.random()*8;
+    c.style.cssText=`left:${Math.random()*100}vw;width:${s}px;height:${s*.6}px;background:${colors[i%colors.length]};
+      animation-duration:${2.2+Math.random()*2.4}s;animation-delay:${Math.random()*.7}s;border-radius:${Math.random()>.5?'50%':'1px'}`;
+    document.body.appendChild(c); setTimeout(()=>c.remove(),5500);
+  }
+}
+
+// ═══ init ═══
+loadState();
+renderAll();
+loadPool();
+</script>
+</body>
+</html>
